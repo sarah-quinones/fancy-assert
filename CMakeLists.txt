@@ -5,7 +5,7 @@ get_directory_property(has_parent PARENT_DIRECTORY)
 set(top_level $<NOT:$<BOOL:${has_parent}>>)
 
 if(top_level)
-  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD 11)
   set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
 

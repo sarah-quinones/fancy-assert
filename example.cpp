@@ -1,4 +1,6 @@
-#include "fancy_assert.hpp"
+// the first time the header is included, it must be done in the global
+// namespace
+#include "fancy-assert/assert.hpp"
 #include <fmt/core.h>
 #include <iostream>
 
@@ -17,8 +19,8 @@ void my_fn(std::array<T, N> arr) {
   FANCY_DEBUG_EXPECT(arr[0] == 3);
 
 #define NDEBUG
-#include "fancy_assert.hpp"
-  // not anymore
+  // subsequent inclusions are valid in any context
+#include "fancy-assert/assert.hpp"
   FANCY_DEBUG_EXPECT(arr[0] == 3);
 
   // prints a warning (first argument) to stderr alongside the error message if
@@ -31,7 +33,8 @@ void my_fn(std::array<T, N> arr) {
   FANCY_EXPECT_ELSE([&] { print("hello world", arr[0]); }, arr[0] == 0);
 
 #undef NDEBUG
-#include "multi_assert.hpp"
+  // subsequent inclusions are valid in any context
+#include "fancy-assert/multi_assert.hpp"
 
   FANCY_DEBUG_EXPECT_ALL_OF((arr[0] == 0), (arr[2] == 1), (arr[1] == 2));
 

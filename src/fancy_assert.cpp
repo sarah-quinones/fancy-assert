@@ -1,9 +1,8 @@
 #ifndef FANCY_ASSERT_FANCY_ASSERT_CPP_EDWHCKSBS
 #define FANCY_ASSERT_FANCY_ASSERT_CPP_EDWHCKSBS
 
-#ifndef FANCY_ASSERT_HEADER_ONLY
-#include "fancy_assert.hpp"
-#endif
+#include "fancy-assert/detail/hedley.h"
+#include "fancy-assert/assert.hpp"
 
 #include <vector>
 #include <string>
@@ -72,14 +71,12 @@ struct finally_t {
   ~finally_t() { callback(); }
 };
 
-FANCY_ASSERT_INLINE
 auto split_at(string_view& text, std::size_t n) -> string_view {
   string_view token = text.substr(0, n);
   text = text.substr(n);
   return token;
 }
 
-FANCY_ASSERT_INLINE
 auto starts_tk1(string_view text, bool extended_char_set = false) -> bool {
   return (
       (not extended_char_set and //
@@ -101,7 +98,6 @@ auto starts_tk1(string_view text, bool extended_char_set = false) -> bool {
       false);
 }
 
-FANCY_ASSERT_INLINE
 auto starts_tk2(string_view text) -> bool {
   return (
       text.starts_with("->") or //
@@ -127,7 +123,6 @@ struct token_t { // NOLINT
 namespace ns_assertions {
 namespace _assert {
 
-FANCY_ASSERT_INLINE
 auto split_if_starts_with(string_view& code_str, string_view word)
     -> string_view {
   if (code_str.starts_with(word)) {
@@ -136,7 +131,6 @@ auto split_if_starts_with(string_view& code_str, string_view word)
   return {};
 }
 
-FANCY_ASSERT_INLINE
 auto next_tk(string_view& code_str, bool extended_char_set = false) -> token_t {
   // trim initial spaces
   while (code_str.starts_with(" ")) {
@@ -236,18 +230,15 @@ auto next_tk(string_view& code_str, bool extended_char_set = false) -> token_t {
   return {token, ident};
 }
 
-FANCY_ASSERT_INLINE
 auto peek_next_tk(string_view code_str, bool extended_char_set = false)
     -> token_t {
   return next_tk(code_str, extended_char_set);
 }
 
-FANCY_ASSERT_INLINE
 auto merge_tk(string_view code_str, token_t prev_tk) -> string_view {
   return {prev_tk.text.begin(), code_str.end()};
 }
 
-FANCY_ASSERT_INLINE
 auto one_of(string_view token, std::initializer_list<string_view> tokens)
     -> bool {
   for (auto tk : tokens) { // NOLINT
@@ -268,7 +259,6 @@ struct parse_type_result_t {
   bool multiline = false;
 };
 
-FANCY_ASSERT_INLINE
 auto parse_type(
     string_view& code_str, size_t indent_level = 0, size_t num_nested = 0)
     -> parse_type_result_t {
@@ -369,7 +359,6 @@ auto parse_type(
   return res;
 }
 
-FANCY_ASSERT_INLINE
 void print_type(
     std::string& output, parse_type_result_t const& type, color_t c) {
 
@@ -392,7 +381,6 @@ void print_type(
   }
 }
 
-FANCY_ASSERT_INLINE
 void parse_func_signature(std::string& output, string_view func) {
   auto color = azure;
 
@@ -575,7 +563,6 @@ void parse_func_signature(std::string& output, string_view func) {
   output += '\n';
 }
 
-FANCY_ASSERT_INLINE
 auto find(string_view sv, char c) -> char const* {
   char const* it = sv.begin();
   for (; it < sv.end(); ++it) {
@@ -586,7 +573,6 @@ auto find(string_view sv, char c) -> char const* {
   return it;
 }
 
-FANCY_ASSERT_INLINE
 void on_fail(long line, char const* file, char const* func, bool is_fatal) {
   auto _clear = [&] { failed_asserts.clear(); };
   finally_t<decltype(_clear)> clear(_clear);
@@ -678,18 +664,16 @@ void on_fail(long line, char const* file, char const* func, bool is_fatal) {
   std::fprintf(stderr, "%s", output.c_str());
 }
 
-FANCY_ASSERT_INLINE
 void on_expect_fail(long line, char const* file, char const* func) {
   on_fail(line, file, func, false);
 }
 
-[[noreturn]] FANCY_ASSERT_INLINE void
+[[noreturn]] void
 on_assert_fail(long line, char const* file, char const* func) {
   on_fail(line, file, func, true);
   std::terminate();
 }
 
-FANCY_ASSERT_INLINE
 void set_assert_params(     //
     string_view expression, //
     callback_t callback,    //
