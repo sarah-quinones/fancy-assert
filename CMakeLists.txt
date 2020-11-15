@@ -2,14 +2,19 @@ cmake_minimum_required(VERSION 3.16)
 project(fancy-assert CXX)
 
 get_directory_property(has_parent PARENT_DIRECTORY)
-set(top_level $<NOT:$<BOOL:${has_parent}>>)
+
+if(has_parent)
+  set(top_level FALSE)
+else()
+  set(top_level TRUE)
+endif()
+
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 if(top_level)
   set(CMAKE_CXX_STANDARD 11)
   set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
-
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(cmake/compiler_warnings.cmake)
 include(cmake/sanitizers.cmake)
@@ -21,7 +26,7 @@ target_include_directories(
   fancy-assert PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-if(top_level)
+if(top_level and ENABLE_TESTING)
   add_library(project_options INTERFACE)
   add_library(project_warnings INTERFACE)
 
@@ -31,16 +36,12 @@ if(top_level)
 
   target_link_libraries(fancy-assert INTERFACE project_options project_warnings)
 
-  option(ENABLE_TESTING OFF)
-  if(ENABLE_TESTING)
-    set(CONAN_REQUIRES # MIT License
-        backward-cpp/1.5
-    )
-    set(CONAN_OPTIONS)
+  set(CONAN_REQUIRES # MIT License
+      backward-cpp/1.5
+  )
+  set(CONAN_OPTIONS)
+  run_conan()
 
-    run_conan()
-
-    enable_testing()
-    add_subdirectory(test)
-  endif()
+  enable_testing()
+  add_subdirectory(test)
 endif()
