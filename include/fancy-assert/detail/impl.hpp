@@ -11,6 +11,12 @@
 #include <string>
 #include <type_traits>
 
+#if __cplusplus >= 201402L
+#define Z_FANCY_ASSERT_CPP14_CONSTEXPR constexpr
+#else
+#define Z_FANCY_ASSERT_CPP14_CONSTEXPR
+#endif
+
 #if defined(Z_FANCY_ASSERT_DIAGNOSTIC_PUSH)
 #undef Z_FANCY_ASSERT_DIAGNOSTIC_PUSH
 #endif
@@ -296,7 +302,9 @@ struct lhs_all_of_t {
 
 #define FANCY_ASSERT_COMPARISON_OP(Op)                                         \
   template <typename U>                                                        \
-  HEDLEY_ALWAYS_INLINE auto operator Op(U const& rhs)->bool {                  \
+  HEDLEY_ALWAYS_INLINE Z_FANCY_ASSERT_CPP14_CONSTEXPR auto operator Op(        \
+      U const& rhs)                                                            \
+      ->bool {                                                                 \
     bool res = static_cast<bool>(lhs Op rhs);                                  \
     if (not res) {                                                             \
       on_assertion_fail(rhs, " " #Op " ");                                     \
@@ -345,13 +353,10 @@ struct expression_decomposer_all_of_t {
   callback_t callback;
 
   template <typename T>
-  auto operator<<(T const& lhs) -> lhs_all_of_t<T> {
+  constexpr auto operator<<(T const& lhs) -> lhs_all_of_t<T> {
     return {lhs, expr, callback};
   }
 };
-
-} // namespace _assert
-} // namespace ns_assertions
 
 #if __cplusplus >= 201402L
 #define Z_FANCY_ASSERT_IMPL_WRAP_LAMBDA(Elem)                                  \
@@ -393,7 +398,7 @@ auto make_call_twice(T&& callable) -> call_twice<T&&> {
 }
 
 #define Z_FANCY_ASSERT_IMPL_WRAP_LAMBDA(Elem)                                  \
-  make_call_twice(                                                             \
+  ::ns_assertions::__assert::make_call_twice(                                  \
       [&]() { /* NOLINT */                                                     \
               /* returns a callable, that when called, returns reference to */ \
               /* Elem if lvalue, or moves it if rvalue*/                       \
@@ -409,11 +414,19 @@ auto make_call_twice(T&& callable) -> call_twice<T&&> {
       })
 #endif
 
-#define Z_FANCY_ASSERT_IMPL_ASSERT_IMPL(Callback, If_Fail, ...)                \
+struct do_nothing_callable {
+  auto operator()() -> char const* { return ""; }
+};
+
+#define Z_FANCY_ASSERT_IMPL_EMPTY_CALLABLE(Elem)                               \
+  ::ns_assertions::_assert::do_nothing_callable {}
+
+#define Z_FANCY_ASSERT_IMPL_ASSERT_IMPL(                                       \
+    Callback, Callable_Wrapper, If_Fail, ...)                                  \
   (static_cast<bool>(                                                          \
        ::ns_assertions::_assert::expression_decomposer_all_of_t{               \
            #__VA_ARGS__,                                                       \
-           Z_FANCY_ASSERT_IMPL_WRAP_LAMBDA(If_Fail),                           \
+           Callable_Wrapper(If_Fail),                                          \
        }                                                                       \
        << __VA_ARGS__)                                                         \
        ? (void)(0)                                                             \
@@ -424,13 +437,35 @@ auto make_call_twice(T&& callable) -> call_twice<T&&> {
 
 #define FANCY_ASSERT_ELSE(...)                                                 \
   Z_FANCY_ASSERT_IMPL_IGNORE_SHIFT_PAREN_WARNING(                              \
-      Z_FANCY_ASSERT_IMPL_ASSERT_IMPL, on_assert_fail, __VA_ARGS__)
+      Z_FANCY_ASSERT_IMPL_ASSERT_IMPL,                                         \
+      on_assert_fail,                                                          \
+      Z_FANCY_ASSERT_IMPL_WRAP_LAMBDA,                                         \
+      __VA_ARGS__)
 #define FANCY_EXPECT_ELSE(...)                                                 \
   Z_FANCY_ASSERT_IMPL_IGNORE_SHIFT_PAREN_WARNING(                              \
-      Z_FANCY_ASSERT_IMPL_ASSERT_IMPL, on_expect_fail, __VA_ARGS__)
+      Z_FANCY_ASSERT_IMPL_ASSERT_IMPL,                                         \
+      on_expect_fail,                                                          \
+      Z_FANCY_ASSERT_IMPL_WRAP_LAMBDA,                                         \
+      __VA_ARGS__)
 
-#define FANCY_ASSERT(...) FANCY_ASSERT_ELSE("", __VA_ARGS__)
-#define FANCY_EXPECT(...) FANCY_EXPECT_ELSE("", __VA_ARGS__)
+#define FANCY_ASSERT(...)                                                      \
+  Z_FANCY_ASSERT_IMPL_IGNORE_SHIFT_PAREN_WARNING(                              \
+      Z_FANCY_ASSERT_IMPL_ASSERT_IMPL,                                         \
+      on_assert_fail,                                                          \
+      Z_FANCY_ASSERT_IMPL_EMPTY_CALLABLE,                                      \
+      "",                                                                      \
+      __VA_ARGS__)
+
+#define FANCY_EXPECT(...)                                                      \
+  Z_FANCY_ASSERT_IMPL_IGNORE_SHIFT_PAREN_WARNING(                              \
+      Z_FANCY_ASSERT_IMPL_ASSERT_IMPL,                                         \
+      on_expect_fail,                                                          \
+      Z_FANCY_ASSERT_IMPL_EMPTY_CALLABLE,                                      \
+      "",                                                                      \
+      __VA_ARGS__)
+
+} // namespace _assert
+} // namespace ns_assertions
 
 #include "fancy-assert/detail/unhedley.h"
 #endif /* end of include guard FANCY_ASSERT_IMPL_HPP_OWZJM607S */
