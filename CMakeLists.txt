@@ -26,7 +26,7 @@ target_include_directories(
   fancy-assert PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-if(top_level and ENABLE_TESTING)
+if(top_level AND ENABLE_TESTING)
   add_library(project_options INTERFACE)
   add_library(project_warnings INTERFACE)
 
