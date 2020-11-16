@@ -14,13 +14,15 @@
       Z_FANCY_ASSERT_IMPL_PP_VARIADIC_TO_SEQ(__VA_ARGS__))
 
 #define Z_FANCY_ASSERT_IMPL_ASSERT_AGGREGATE_IMPL_FTOR(_, Decomposer, Elem)    \
-  (::ns_assertions::_assert::Decomposer{                                       \
-       Z_FANCY_ASSERT_IMPL_PP_STRINGIZE(Z_FANCY_ASSERT_IMPL_PP_REMOVE_PARENS(  \
-           Z_FANCY_ASSERT_IMPL_PP_TUPLE_POP_FRONT(Elem))),                     \
-       Z_FANCY_ASSERT_IMPL_EMPTY_CALLABLE(""),                                 \
-   }                                                                           \
-   << Z_FANCY_ASSERT_IMPL_PP_REMOVE_PARENS(                                    \
-          Z_FANCY_ASSERT_IMPL_PP_TUPLE_POP_FRONT(Elem))),
+  static_cast<bool>(                                                           \
+      ::ns_assertions::_assert::Decomposer{                                    \
+          Z_FANCY_ASSERT_IMPL_PP_STRINGIZE(                                    \
+              Z_FANCY_ASSERT_IMPL_PP_REMOVE_PARENS(                            \
+                  Z_FANCY_ASSERT_IMPL_PP_TUPLE_POP_FRONT(Elem))),              \
+          Z_FANCY_ASSERT_IMPL_EMPTY_CALLABLE(""),                              \
+      }                                                                        \
+      << Z_FANCY_ASSERT_IMPL_PP_REMOVE_PARENS(                                 \
+             Z_FANCY_ASSERT_IMPL_PP_TUPLE_POP_FRONT(Elem))),
 
 #define Z_FANCY_ASSERT_IMPL_ASSERT_ELSE_AGGREGATE_IMPL_FTOR(                   \
     _, Decomposer, Elem)                                                       \
