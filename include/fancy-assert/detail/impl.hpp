@@ -338,8 +338,8 @@ struct lhs_all_of_t {
 
 #undef FANCY_ASSERT_COMPARISON_OP
 
-  HEDLEY_ALWAYS_INLINE explicit
-  operator/* NOLINT(hicpp-explicit-conversions) */ bool() {
+  HEDLEY_ALWAYS_INLINE explicit Z_FANCY_ASSERT_CPP14_CONSTEXPR
+  operator/* NOLINT(hicpp-explicit-conversions) */ bool() const {
     bool res = static_cast<bool>(lhs);
     if (not res) {
       _assert::set_assert_params(
@@ -354,7 +354,7 @@ struct expression_decomposer_all_of_t {
   callback_t callback;
 
   template <typename T>
-  constexpr auto operator<<(T const& lhs) -> lhs_all_of_t<T> {
+  constexpr auto operator<<(T const& lhs) const -> lhs_all_of_t<T> {
     return {lhs, expr, callback};
   }
 };
