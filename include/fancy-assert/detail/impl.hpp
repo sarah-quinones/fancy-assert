@@ -262,6 +262,7 @@ auto to_string(T const& val) -> std::string {
   return static_cast<std::stringstream&&>(ss).str();
 }
 
+Z_FANCY_ASSERT_CPP14_CONSTEXPR
 auto inline all_of(std::initializer_list<bool> arr) -> bool {
   for/* NOLINT */ (bool b : arr) {
     if (!b) {
