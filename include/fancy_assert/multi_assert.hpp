@@ -1,8 +1,8 @@
 #ifndef REPO_MULTI_ASSERT_HPP_JL3FUYOTS
 #define REPO_MULTI_ASSERT_HPP_JL3FUYOTS
 
-#include "fancy-assert/detail/boostpp.h"
-#include "fancy-assert/assert.hpp"
+#include "fancy_assert/detail/boostpp.h"
+#include "fancy_assert/assert.hpp"
 
 #define Z_FANCY_ASSERT_IMPL_ELSE_AGGREGATE_IMPL1(                              \
     Ftor, Decomposer, Aggregator, Callback, ...)                               \

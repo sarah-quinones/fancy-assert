@@ -1,8 +1,8 @@
 #ifndef FANCY_ASSERT_FANCY_ASSERT_CPP_EDWHCKSBS
 #define FANCY_ASSERT_FANCY_ASSERT_CPP_EDWHCKSBS
 
-#include "fancy-assert/detail/hedley.h"
-#include "fancy-assert/assert.hpp"
+#include "fancy_assert/detail/hedley.h"
+#include "fancy_assert/assert.hpp"
 
 #include <vector>
 #include <string>

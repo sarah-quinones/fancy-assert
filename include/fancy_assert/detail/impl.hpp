@@ -1,7 +1,7 @@
 #ifndef FANCY_ASSERT_IMPL_HPP_OWZJM607S
 #define FANCY_ASSERT_IMPL_HPP_OWZJM607S
 
-#include "fancy-assert/detail/hedley.h"
+#include "fancy_assert/detail/hedley.h"
 
 #include <cstring>
 #include <cstdint>
@@ -468,5 +468,5 @@ struct do_nothing_callable {
 } // namespace _assert
 } // namespace ns_assertions
 
-#include "fancy-assert/detail/unhedley.h"
+#include "fancy_assert/detail/unhedley.h"
 #endif /* end of include guard FANCY_ASSERT_IMPL_HPP_OWZJM607S */

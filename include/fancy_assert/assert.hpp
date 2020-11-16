@@ -1,4 +1,4 @@
-#include "fancy-assert/detail/impl.hpp"
+#include "fancy_assert/detail/impl.hpp"
 
 #ifdef FANCY_DEBUG_ASSERT
 #undef FANCY_DEBUG_ASSERT
