@@ -17,7 +17,7 @@
   (::ns_assertions::_assert::Decomposer{                                       \
        Z_FANCY_ASSERT_IMPL_PP_STRINGIZE(Z_FANCY_ASSERT_IMPL_PP_REMOVE_PARENS(  \
            Z_FANCY_ASSERT_IMPL_PP_TUPLE_POP_FRONT(Elem))),                     \
-       Z_FANCY_ASSERT_IMPL_WRAP_LAMBDA(""),                                    \
+       Z_FANCY_ASSERT_IMPL_EMPTY_CALLABLE(""),                                 \
    }                                                                           \
    << Z_FANCY_ASSERT_IMPL_PP_REMOVE_PARENS(                                    \
           Z_FANCY_ASSERT_IMPL_PP_TUPLE_POP_FRONT(Elem))),
