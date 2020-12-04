@@ -11,12 +11,6 @@
 #include <string>
 #include <type_traits>
 
-#if __cplusplus >= 201402L
-#define Z_FANCY_ASSERT_CPP14_CONSTEXPR constexpr
-#else
-#define Z_FANCY_ASSERT_CPP14_CONSTEXPR
-#endif
-
 #if defined(Z_FANCY_ASSERT_DIAGNOSTIC_PUSH)
 #undef Z_FANCY_ASSERT_DIAGNOSTIC_PUSH
 #endif
@@ -299,8 +293,7 @@ struct lhs_all_of_t {
 
 #define FANCY_ASSERT_COMPARISON_OP(Op)                                         \
   template <typename U>                                                        \
-  HEDLEY_ALWAYS_INLINE Z_FANCY_ASSERT_CPP14_CONSTEXPR auto operator Op(        \
-      U const& rhs) const->bool {                                              \
+  HEDLEY_ALWAYS_INLINE constexpr auto operator Op(U const& rhs) const->bool {  \
     return process_op(static_cast<bool>(lhs Op rhs), rhs, " " #Op " ");        \
   }                                                                            \
   static_assert(true, "")
