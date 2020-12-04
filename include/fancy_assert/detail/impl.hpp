@@ -262,19 +262,15 @@ auto to_string(T const& val) -> std::string {
   return static_cast<std::stringstream&&>(ss).str();
 }
 
-Z_FANCY_ASSERT_CPP14_CONSTEXPR
-auto inline all_of(std::initializer_list<bool> arr) -> bool {
-  for/* NOLINT */ (bool b : arr) {
-    if (!b) {
-      return false;
-    }
-  }
-  return true;
+constexpr auto all_of_impl(bool const* arr, std::size_t n) -> bool {
+  return n == 0 ? true : (arr[0] && all_of_impl(arr + 1, n - 1));
 }
 
-[[noreturn]]
+constexpr auto inline all_of(std::initializer_list<bool> arr) -> bool {
+  return all_of_impl(arr.begin(), arr.size());
+}
 
-void on_assert_fail(long line, char const* file, char const* func);
+[[noreturn]] void on_assert_fail(long line, char const* file, char const* func);
 void on_expect_fail(long line, char const* file, char const* func);
 void set_assert_params(     //
     string_view expression, //
@@ -292,7 +288,7 @@ struct lhs_all_of_t {
   callback_t callback;
 
   template <typename U>
-  void on_assertion_fail(U const& rhs, string_view op_str) {
+  void on_assertion_fail(U const& rhs, string_view op_str) const {
     ::ns_assertions::_assert::set_assert_params(
         expr,
         callback,
@@ -304,13 +300,8 @@ struct lhs_all_of_t {
 #define FANCY_ASSERT_COMPARISON_OP(Op)                                         \
   template <typename U>                                                        \
   HEDLEY_ALWAYS_INLINE Z_FANCY_ASSERT_CPP14_CONSTEXPR auto operator Op(        \
-      U const& rhs)                                                            \
-      ->bool {                                                                 \
-    bool res = static_cast<bool>(lhs Op rhs);                                  \
-    if (not res) {                                                             \
-      on_assertion_fail(rhs, " " #Op " ");                                     \
-    }                                                                          \
-    return res;                                                                \
+      U const& rhs) const->bool {                                              \
+    return process_op(static_cast<bool>(lhs Op rhs), rhs, " " #Op " ");        \
   }                                                                            \
   static_assert(true, "")
 
@@ -338,14 +329,21 @@ struct lhs_all_of_t {
 
 #undef FANCY_ASSERT_COMPARISON_OP
 
-  HEDLEY_ALWAYS_INLINE explicit Z_FANCY_ASSERT_CPP14_CONSTEXPR
-  operator/* NOLINT(hicpp-explicit-conversions) */ bool() const {
-    bool res = static_cast<bool>(lhs);
-    if (not res) {
-      _assert::set_assert_params(
-          expr, callback, "", _assert::to_string(lhs), "");
-    }
-    return res;
+  HEDLEY_ALWAYS_INLINE explicit constexpr
+  operator bool() const { // NOLINT(hicpp-explicit-conversions)
+    return process_bool(static_cast<bool>(lhs));
+  }
+
+  HEDLEY_ALWAYS_INLINE constexpr auto process_bool(bool res) const -> bool {
+    return (res ? void(0)
+                : _assert::set_assert_params(
+                      expr, callback, "", _assert::to_string(lhs), "")),
+           res;
+  }
+  template <typename U>
+  HEDLEY_ALWAYS_INLINE constexpr auto
+  process_op(bool res, U const& rhs, char const* op) const -> bool {
+    return (res ? void(0) : on_assertion_fail(rhs, op)), res;
   }
 };
 
@@ -399,16 +397,18 @@ auto make_call_twice(T&& callable) -> call_twice<T&&> {
 }
 
 #define Z_FANCY_ASSERT_IMPL_WRAP_LAMBDA(Elem)                                  \
-  ::ns_assertions::__assert::make_call_twice(                                  \
+  ::ns_assertions::_assert::make_call_twice(                                   \
       [&]() { /* NOLINT */                                                     \
               /* returns a callable, that when called, returns reference to */ \
               /* Elem if lvalue, or moves it if rvalue*/                       \
               auto&& _value = Elem; /* create object */                        \
               using _type =                                                    \
-                  typename remove_rvalue_ref<decltype(_value)>::type;          \
+                  typename ::ns_assertions::_assert::remove_rvalue_ref<        \
+                      decltype(_value)>::type;                                 \
                                                                                \
               /* move into lambda */                                           \
-              move_on_copy<_type> _wrapper{static_cast<_type&&>(_value)};      \
+              ::ns_assertions::_assert::move_on_copy<_type> _wrapper{          \
+                  static_cast<_type&&>(_value)};                               \
               return [&, _wrapper]() mutable -> _type {                        \
                 return static_cast<_type&&>(_wrapper.m_inner);                 \
               };                                                               \
