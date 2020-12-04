@@ -591,12 +591,15 @@ void on_fail(long line, char const* file, char const* func, bool is_fatal) {
   }
   output += ' ';
   output += with_color(orange_red, "failed");
-  output += "\nin function:\n";
-  output += func;
   output += '\n';
-  output += with_color(gray, file + (':' + std::to_string(line)) + ':');
-  output += '\n';
-  parse_func_signature(output, func);
+  if (func[0] != '\0') {
+    output += "in function:\n";
+    output += func;
+    output += '\n';
+    output += with_color(gray, file + (':' + std::to_string(line)) + ':');
+    output += '\n';
+    parse_func_signature(output, func);
+  }
 
   char const* separator = "";
 

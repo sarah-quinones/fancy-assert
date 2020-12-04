@@ -59,8 +59,14 @@
   Macro(__VA_ARGS__)
 #endif
 
-#if defined(HEDLEY_GNUC_VERSION)
+#if defined(__GNUC__)
+
+#if defined(__clang__) || __cplusplus >= 201402L
 #define Z_FANCY_ASSERT_IMPL_THIS_FUNCTION __PRETTY_FUNCTION__
+#else
+#define Z_FANCY_ASSERT_IMPL_THIS_FUNCTION ""
+#endif
+
 #elif defined(HEDLEY_MSVC_VERSION)
 #define Z_FANCY_ASSERT_IMPL_THIS_FUNCTION __FUNCSIG__
 #else
@@ -146,7 +152,7 @@ struct string_view {
   template <
       typename T,
       typename enable_if<
-          begin_end<T>::value and not std::is_same<T, string_view>::value,
+          begin_end<T>::value && not std::is_same<T, string_view>::value,
           void>::type* = nullptr>
   constexpr string_view /* NOLINT */ (T const& str_container)
       : m_begin{begin_end<T>::b(str_container)},
@@ -164,7 +170,7 @@ struct string_view {
     if (s1.empty()) {
       return s2.empty();
     }
-    return s1.size() == s2.size() and
+    return s1.size() == s2.size() &&
            (std::memcmp(s1.m_begin, s2.m_begin, s1.size()) == 0);
   }
 
@@ -184,7 +190,7 @@ struct string_view {
   }
 
   HEDLEY_WARN_UNUSED_RESULT auto starts_with(string_view s2) const -> bool {
-    return this->size() >= s2.size() and this->substr(0, s2.size()) == s2;
+    return this->size() >= s2.size() && this->substr(0, s2.size()) == s2;
   }
 
   HEDLEY_WARN_UNUSED_RESULT auto empty_or_matches(string_view s2) const
